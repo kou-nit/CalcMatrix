@@ -18,6 +18,7 @@ namespace Console_CalcMat
             {
                 Console.WriteLine(matcal[i,i]);
             }
+
             // 1次元分の長さ
             //Console.WriteLine(matcal.GetLength(0));
 
