@@ -10,37 +10,26 @@ namespace Console_CalcMat
     {
         static void Main(string[] args)
         {
-            int[,] mat = new int[3, 3];
-            int nofrow = 3;
-            int[,] matcal = new int[3, 3] { { 1, 3, 4 }, { 2, -2, 1 }, { 4, 5, 2 } };
-            
-            for (int i = 0; i < nofrow; i++)
+//            string[] mat_s; // 1行単位の読み取り, 要素数は列数となる.
+            int Row, Column;
+            Console.Write("Row=");
+            Row = int.Parse(Console.ReadLine());
+            Console.Write("Column=");
+            Column = int.Parse(Console.ReadLine());
+            List<string> mat_s = new List<string> { };
+            int i = 0;
+            while (true)
             {
-                Console.WriteLine(matcal[i,i]);
+                mat_s.Add(Console.ReadLine());
             }
-
-            // 1次元分の長さ
-            //Console.WriteLine(matcal.GetLength(0));
-
-            // 3 x 3 の行列
-            CalcMat hoge = new CalcMat(new double[,] { { 1, 1, 1 }, { 1, 1, 1 }, { 1, 1, 1 } });
-            Console.WriteLine(hoge.mtrx);
-            for (int i = 0; i < nofrow; i++)
-            {
-                for (int j = 0; j < nofrow; j++)
-                {
-                    Console.Write(hoge.mtrx[i, j]);
-                }
-                Console.WriteLine();
-            }
-            Console.WriteLine(hoge.Length());
-            
+            //            input = double.Parse();
+//            Console.WriteLine(input);
             // CalcMatクラスのmethodの利用例
             /*
              * 行＝ROW
              * 列＝COLUMN
              * 
-             * CalcMat test = new CalcMat(new double[,][1,2],[3,4]);
+             * CalcMat test = new CalcMat(new double[,]{{1,2},{3,4}});
              * => --       --
              *    |  1   2  |
              *    |  3   4  |
@@ -77,32 +66,30 @@ namespace Console_CalcMat
             Console.WriteLine("列の入れ替え");
             debug1.SwapColumns(0, 0);
             Console.WriteLine(debug1.mtrx == debug1.init_mtrx);
-            debug1.mtrx.CopyTo(debug1.init_mtrx, 0);
+            debug1.CopyFromInit();
             debug1.SwapColumns(0, 1);
             debug1.Print();
-            debug1.mtrx.CopyTo(debug1.init_mtrx, 0);
+            debug1.CopyFromInit();
             debug1.Print();
             debug1.SwapColumns(1, 0);
-            debug1.mtrx.CopyTo(debug1.init_mtrx, 0);
             debug1.SwapColumns(0, 2);
             debug1.SwapColumns(2, 1);
             debug1.Print();
             debug1.SwapColumns(1, 0);
-            debug1.mtrx.CopyTo(debug1.init_mtrx, 0);
+            debug1.CopyFromInit();
             debug2.SwapColumns(0, 1);
             debug2.Print();
-            debug2.mtrx.CopyTo(debug1.init_mtrx, 0);
+            debug2.CopyFromInit();
             // 行の入れ替え SwapRows(arg1, arg2)
             // arg1 < -- > arg2
             Console.WriteLine("行の入れ替え");
             debug1.SwapRows(0, 1);
             debug1.Print();
-            debug1.mtrx = debug1.init_mtrx;
+            debug1.CopyFromInit();
             debug1.Print();
             debug2.SwapRows(0, 2);
             debug2.Print();
-            debug2.mtrx = debug2.init_mtrx;
-
+            debug2.CopyFromInit();            
             // 列の入れ替え（定数倍あり）
 
             // 行の入れ替え (定数倍あり)
@@ -142,15 +129,23 @@ namespace Console_CalcMat
             col1 = new double[Inputmat.GetLength(0)];
             col2 = new double[Inputmat.GetLength(0)];
             // 初期入力の行列を保存
+            init_mtrx = new double[Inputmat.GetLength(0), Inputmat.GetLength(1)];
             CopyToInitialMatrix(Inputmat, init_mtrx);
             mtrx = Inputmat;
         }
         private void CopyToInitialMatrix(double[,] source, double[,] destination)
         {
-            for (int i = 0; i < this.RowLength(); i++)
+            for (int i = 0; i < source.GetLength(0); i++)
             {
-                
+                for (int j = 0; j < source.GetLength(1); j++)
+                {
+                    destination[i, j] = source[i, j];
+                }
             }
+        }
+        public void CopyFromInit()
+        {
+            CopyToInitialMatrix(init_mtrx, this.mtrx);
         }
         /// <summary>
         /// 行と列数の最大数
