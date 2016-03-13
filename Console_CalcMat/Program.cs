@@ -10,20 +10,47 @@ namespace Console_CalcMat
     {
         static void Main(string[] args)
         {
-//            string[] mat_s; // 1行単位の読み取り, 要素数は列数となる.
-            int Row, Column;
-            Console.Write("Row=");
-            Row = int.Parse(Console.ReadLine());
-            Console.Write("Column=");
-            Column = int.Parse(Console.ReadLine());
+            int Row_n, Column_n;
+            Console.Write("Row =");
+            Row_n = int.Parse(Console.ReadLine());
+            Console.Write("Column =");
+            Column_n = int.Parse(Console.ReadLine());
+            // 行列用の配列
+            double[,] mtr_input = new double[Row_n, Column_n];
+            // 入力用リスト
             List<string> mat_s = new List<string> { };
+            // 行数分, ReadLineでデータの入力受付
+            /*
+             *  入力例
+             *  Row = 3
+             *  Column = 2
+             *  >> 32 3.9 \n
+             *  >> 0 3 \n
+             *  >> 100 0.3 \n
+             * 
+             */
             int i = 0;
-            while (true)
+            while (i < Row_n)
             {
+                // 入力受付
                 mat_s.Add(Console.ReadLine());
+                // 入力文字処理
+                // スペース1文字分で, 文字を分解
+                int cnt = 0;
+                foreach (var num in mat_s[i].Split(' '))
+                {
+                    //列数分のみ文字->数値に変換して取得
+                    if (cnt < Column_n)
+                    {
+                        mtr_input[i, cnt] = double.Parse(num);
+                    }
+                    cnt++;
+                }
+                i++;
             }
-            //            input = double.Parse();
-//            Console.WriteLine(input);
+            // 入力確認
+            CalcMat DebugPrint = new CalcMat(mtr_input);
+            DebugPrint.Print();
             // CalcMatクラスのmethodの利用例
             /*
              * 行＝ROW
@@ -34,7 +61,6 @@ namespace Console_CalcMat
              *    |  1   2  |
              *    |  3   4  |
              *    --       --
-             * 
              */
             // 2 x 3 の行列
             CalcMat debug1 = new CalcMat(new double[,] { { 1, 2, 3 }, { 4, 5, 6 } });
@@ -65,7 +91,6 @@ namespace Console_CalcMat
             // arg1 < -- > arg2
             Console.WriteLine("列の入れ替え");
             debug1.SwapColumns(0, 0);
-            Console.WriteLine(debug1.mtrx == debug1.init_mtrx);
             debug1.CopyFromInit();
             debug1.SwapColumns(0, 1);
             debug1.Print();
@@ -89,15 +114,29 @@ namespace Console_CalcMat
             debug1.Print();
             debug2.SwapRows(0, 2);
             debug2.Print();
-            debug2.CopyFromInit();            
-            // 列の入れ替え（定数倍あり）
-
-            // 行の入れ替え (定数倍あり)
-
-            // i 列 + j 列 = i 列
-
-            // i 行 + j 行 = i 行
-
+            debug2.CopyFromInit();
+            // ある列を定数倍する
+            debug1.ColumnMultipliedByConst(3, 3);
+            debug2.ColumnMultipliedByConst(1, 2);
+            // ある行を定数倍する
+            debug1.RowMultipliedByConst(2, 4);
+            debug2.RowMultipliedByConst(3, 2.2);
+            debug1.Print();
+            debug2.Print();
+            debug1.CopyFromInit();
+            debug2.CopyFromInit();
+            // i 列 + const * j 列 = i 列
+            debug1.ColumnMulAdd(3, 1, 2);
+            debug2.ColumnMulAdd(2, 2, 3);
+            debug1.Print();
+            debug2.Print();
+            debug1.CopyFromInit();
+            debug2.CopyFromInit();
+            // i 行 + const * j 行 = i 行
+            debug1.RowMulAdd(1, 2, 3);
+            debug2.RowMulAdd(3, 1, 2);
+            debug1.Print();
+            debug2.Print();
         }
     }
     /// <summary>
@@ -133,6 +172,11 @@ namespace Console_CalcMat
             CopyToInitialMatrix(Inputmat, init_mtrx);
             mtrx = Inputmat;
         }
+        /// <summary>
+        /// 初期入力の行列を保存する
+        /// </summary>
+        /// <param name="source"></param>
+        /// <param name="destination"></param>
         private void CopyToInitialMatrix(double[,] source, double[,] destination)
         {
             for (int i = 0; i < source.GetLength(0); i++)
@@ -143,6 +187,9 @@ namespace Console_CalcMat
                 }
             }
         }
+        /// <summary>
+        /// 初期の行列への初期化
+        /// </summary>
         public void CopyFromInit()
         {
             CopyToInitialMatrix(init_mtrx, this.mtrx);
@@ -172,7 +219,7 @@ namespace Console_CalcMat
             return mtrx.GetLength(1);
         }
         /// <summary>
-        /// 行の入れ替え
+        /// 行の入れ替え: 行基本変形
         /// </summary>
         /// <param name="Row1"></param>
         /// <param name="Row2"></param>
@@ -196,7 +243,7 @@ namespace Console_CalcMat
             }
         }
         /// <summary>
-        /// 列の入れ替え
+        /// 列の入れ替え: 列基本変形
         /// </summary>
         /// <param name="Col1"></param>
         /// <param name="Col2"></param>
@@ -217,6 +264,56 @@ namespace Console_CalcMat
             {
                 this.mtrx[i, Col1] = col2[i];
                 this.mtrx[i, Col2] = col1[i];
+            }
+        }
+        /// <summary>
+        /// ある列の定数倍: 列基本変形
+        /// </summary>
+        /// <param name="Col"></param>
+        /// <param name="Const"></param>
+        public void ColumnMultipliedByConst(int Col, double Const)
+        {
+            for (int i = 0; i < this.RowLength(); i++)
+            {
+                mtrx[i, Col - 1] = Const * mtrx[i, Col - 1];
+            }
+        }
+        /// <summary>
+        /// ある行の定数倍: 行基本変形
+        /// </summary>
+        /// <param name="Row"></param>
+        /// <param name="Const"></param>
+        public void RowMultipliedByConst(int Row, double Const)
+        {
+            for (int i = 0; i < this.ColumnLength(); i++)
+            {
+                mtrx[Row - 1, i] = Const * mtrx[Row - 1, i];
+            }
+        }
+        /// <summary>
+        /// ある列を定数倍して, 他の列に加える: 列基本変形
+        /// </summary>
+        /// <param name="Col_src"></param>
+        /// <param name="Col_dest"></param>
+        /// <param name="Const"></param>
+        public void ColumnMulAdd(int Col_src, int Col_dest, double Const)
+        {
+            for (int i = 0; i < this.RowLength(); i++)
+            {
+                mtrx[i, Col_dest - 1] = Const * mtrx[i, Col_src - 1] + mtrx[i, Col_dest - 1];
+            }
+        }
+        /// <summary>
+        /// ある行を定数倍して, 他の行に加える: 行基本変形
+        /// </summary>
+        /// <param name="Row_src"></param>
+        /// <param name="Row_dest"></param>
+        /// <param name="Const"></param>
+        public void RowMulAdd(int Row_src, int Row_dest, double Const)
+        {
+            for (int i = 0; i < this.ColumnLength(); i++)
+            {
+                mtrx[Row_dest - 1, i] = Const * mtrx[Row_src - 1, i] + mtrx[Row_dest - 1, i];
             }
         }
         /// <summary>
